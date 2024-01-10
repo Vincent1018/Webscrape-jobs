@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 import requests 
 import time
+TESTING TESTING
 
 #1 create a variable to hold all of the user inputs
 #2 create a loop to keep asking the user for input and stop when they are 'done'
