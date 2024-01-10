@@ -16,7 +16,7 @@ while True:
     unfamiliar_skills.append(user_input)
 
 #4 if the user has no unfamiliar skills, praise em
-#5 print a message stating what skills are being filtered out from the job postings   
+#5 else print a message stating what skills are being filtered out from the job postings   
 if not unfamiliar_skills:
     print("You have no unfamiliar skills? Wonderful!")
 
@@ -57,7 +57,7 @@ def find_jobs():
                     if skill in skills:
                         unfamiliar_counter = unfamiliar_counter + 1
                     
-                    if unfamiliar_counter == 0 or not unfamiliar_skills:
+                    if unfamiliar_counter == 0:
                         with open(f'posts/{index}.txt', 'w') as f:
                             f.write(f"Company Name: {company_name.strip()} \n") 
                             f.write(f"Required Skills: {skills.strip()} \n") 
@@ -72,7 +72,7 @@ def find_jobs():
                     f.write(f"More Info: {more_info}")
                 print(f'File Saved: {index}')
 
-#18 if this python script is being run as the main program and not as a module to another script (which it is), then wait x time and rerun 
+#18 if this python script is being run as the main program and not as a module to another script (which it isn't), then wait x time and rerun 
 if __name__ == '__main__':
     while True: 
         find_jobs()
