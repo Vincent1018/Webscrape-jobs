@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
 import requests 
 import time
-TESTING TESTING
 
 #1 create a variable to hold all of the user inputs
 #2 create a loop to keep asking the user for input and stop when they are 'done'
@@ -34,6 +33,15 @@ def find_jobs(base_url, num_pages):
         html_text = requests.get(url).text
         soup = BeautifulSoup(html_text, 'lxml')
         jobs = soup.find_all('li', class_= "clearfix job-bx wht-shd-bx")
+        next = soup.find_all('em')
+        
+        pageno = 0
+
+        for item in next:
+             if item.a.text != "Next 10 pages":
+                 pageno = pageno + 1
+
+
 
         #10 enumerate the jobs variable so we can access the index and loop through each job and their index in jobs
         #11 set the published_date = to when the job posting was published, it's in a span tag within a span tag
@@ -84,3 +92,5 @@ if __name__ == '__main__':
         time_wait = 10
         print(f"Waiting {time_wait} minutes...")
         time.sleep(time_wait * 60)
+
+
