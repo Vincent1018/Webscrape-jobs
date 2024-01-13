@@ -1,4 +1,6 @@
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.common.exceptions import NoSuchElementException
 import requests 
 import time
 
@@ -33,15 +35,6 @@ def find_jobs(base_url, num_pages):
         html_text = requests.get(url).text
         soup = BeautifulSoup(html_text, 'lxml')
         jobs = soup.find_all('li', class_= "clearfix job-bx wht-shd-bx")
-        next = soup.find_all('em')
-        
-        pageno = 0
-
-        for item in next:
-             if item.a.text != "Next 10 pages":
-                 pageno = pageno + 1
-
-
 
         #10 enumerate the jobs variable so we can access the index and loop through each job and their index in jobs
         #11 set the published_date = to when the job posting was published, it's in a span tag within a span tag
@@ -85,7 +78,22 @@ def find_jobs(base_url, num_pages):
 #18 if this python script is being run as the main program and not as a module to another script (which it isn't), then wait x time and rerun 
 if __name__ == '__main__':
     base_url = 'https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords=python&txtLocation='
-    num_pages = 5
+
+    driver = webdriver.Chrome()
+    driver.get(base_url)
+    next_page_elements = driver.find_elements(By.CLASS_NAME, "nxtC")
+    num_pages = 0
+
+    for next_button in next_page_elements:
+        try:
+            next_button.click()
+            driver.implicitly_wait(5)
+
+        except NoSuchElementException:
+            pages = driver.find_elements(By.TAG_NAME, "em")
+            for page in pages:
+                num_pages = max(num_pages, int(page.text))
+            break
 
     while True: 
         find_jobs(base_url, num_pages)
