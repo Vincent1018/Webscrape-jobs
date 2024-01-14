@@ -81,12 +81,16 @@ if __name__ == '__main__':
 
     driver = webdriver.Chrome()
     driver.get(base_url)
-    next_page_elements = driver.find_elements(By.CLASS_NAME, "nxtC")
+    
     num_pages = 0
 
-    for next_button in next_page_elements:
+    while True:
+        find_jobs(base_url, num_pages)
+
+        next_page_elements = driver.find_elements(By.CLASS_NAME, "nxtC")
+
         try:
-            next_button.click()
+            next_page_elements.click()
             driver.implicitly_wait(5)
 
         except NoSuchElementException:
@@ -95,8 +99,6 @@ if __name__ == '__main__':
                 num_pages = max(num_pages, int(page.text))
             break
 
-    while True: 
-        find_jobs(base_url, num_pages)
         time_wait = 10
         print(f"Waiting {time_wait} minutes...")
         time.sleep(time_wait * 60)
