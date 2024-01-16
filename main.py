@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.by import By
 import requests 
 import time
 
@@ -81,17 +82,13 @@ if __name__ == '__main__':
 
     driver = webdriver.Chrome()
     driver.get(base_url)
-    
     num_pages = 0
 
     while True:
-        find_jobs(base_url, num_pages)
-
-        next_page_elements = driver.find_elements(By.CLASS_NAME, "nxtC")
-
         try:
-            next_page_elements.click()
-            driver.implicitly_wait(5)
+            next_page_element = driver.find_element(By.CLASS_NAME, "nxtC")
+            next_page_element.click()
+            driver.implicitly_wait(7)
 
         except NoSuchElementException:
             pages = driver.find_elements(By.TAG_NAME, "em")
@@ -99,8 +96,11 @@ if __name__ == '__main__':
                 num_pages = max(num_pages, int(page.text))
             break
 
-        time_wait = 10
-        print(f"Waiting {time_wait} minutes...")
-        time.sleep(time_wait * 60)
+    print(f"Number of pages: {num_pages}")
+    #while True: 
+     #   find_jobs(base_url, num_pages)
+      #  time_wait = 10
+       # print(f"Waiting {time_wait} minutes...")
+        #time.sleep(time_wait * 60)
 
 
