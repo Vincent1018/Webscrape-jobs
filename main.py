@@ -1,7 +1,12 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 import requests 
 import time
 
@@ -80,23 +85,36 @@ def find_jobs(base_url, num_pages):
 if __name__ == '__main__':
     base_url = 'https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords=python&txtLocation='
 
-    driver = webdriver.Chrome()
-    driver.get(base_url)
-    num_pages = 0
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    service = Service(ChromeDriverManager().install())
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+    wait = WebDriverWait(driver, 10)
 
-    while True:
-        try:
-            next_page_element = driver.find_element(By.CLASS_NAME, "nxtC")
-            next_page_element.click()
-            driver.implicitly_wait(7)
+    try:
+        driver.get(base_url)
 
-        except NoSuchElementException:
-            pages = driver.find_elements(By.TAG_NAME, "em")
-            for page in pages:
-                num_pages = max(num_pages, int(page.text))
-            break
+        # Navigate through the pagination
+        while True:
+            try:
+                # Wait for the 'Next' button to be clickable
+                next_button = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "nxtC")))
 
-    print(f"Number of pages: {num_pages}")
+                # Use JavaScript to click the 'Next' button
+                driver.execute_script("arguments[0].click();", next_button)
+
+            except (NoSuchElementException, TimeoutException, StaleElementReferenceException):
+                # Break the loop if 'Next' button is not found or not clickable
+                break
+
+        # Once the last page is reached, find the last page number
+        page_numbers = driver.find_elements(By.TAG_NAME, 'em')
+        last_page_num = max([int(page.text) for page in page_numbers if page.text.isdigit()])
+
+        print(f"Last page number: {last_page_num}")
+
+    finally:
+        driver.quit()
     #while True: 
      #   find_jobs(base_url, num_pages)
       #  time_wait = 10
