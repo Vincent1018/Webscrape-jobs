@@ -35,50 +35,45 @@ else:
 #8 create an instance of BeautifulSoup for html_text using the lxml parser
 #9 in the BeautifulSoup instance, find all of the li tags that have the "clearfix job-bx wht-shd-bx" class to get every job posting
 def find_jobs(base_url, num_pages):
-    for page in range(1, num_pages + 1):
-        url = f'{base_url}&sequence={page}'
-        html_text = requests.get(url).text
-        soup = BeautifulSoup(html_text, 'lxml')
-        jobs = soup.find_all('li', class_= "clearfix job-bx wht-shd-bx")
+    with open('txt/all_jobs.txt', 'w', encoding='utf-8') as f:
+        for page in range(1, num_pages + 1):
+            url = f'{base_url}&sequence={page}'
+            html_text = requests.get(url).text
+            soup = BeautifulSoup(html_text, 'lxml')
+            jobs = soup.find_all('li', class_= "clearfix job-bx wht-shd-bx")
+            f.write(f"PAGE {page} \n\n") 
 
-        #10 enumerate the jobs variable so we can access the index and loop through each job and their index in jobs
-        #11 set the published_date = to when the job posting was published, it's in a span tag within a span tag
-        #12 if 'few' exists in the published date then it is recent and we want to include this job
-        for index, job in enumerate(jobs):
-            published_date = job.find('span', class_ = 'sim-posted').span.text
+            #10 enumerate the jobs variable so we can access the index and loop through each job and their index in jobs
+            #11 set the published_date = to when the job posting was published, it's in a span tag within a span tag
+            #12 if 'few' exists in the published date then it is recent and we want to include this job
+            for job in jobs:
+                published_date = job.find('span', class_ = 'sim-posted').span.text
 
-            if 'few' in published_date:
+                if 'few' in published_date:
 
-                #13 find the company name, the skills and the link to more info for the job posting
-                #14 initialize an unfamiliar_counter to count if there are unfamiliar skills from the user in the required skills list of the job posting
-                company_name = job.find('h3', class_= 'joblist-comp-name').text.replace(' ','')
-                skills = job.find('span', class_ = "srp-skills").text.replace(' ', '')
-                more_info = job.header.h2.a['href']
+                    #13 find the company name, the skills and the link to more info for the job posting
+                    #14 initialize an unfamiliar_counter to count if there are unfamiliar skills from the user in the required skills list of the job posting
+                    company_name = job.find('h3', class_= 'joblist-comp-name').text.replace(' ','')
+                    skills = job.find('span', class_ = "srp-skills").text.replace(' ', '')
+                    more_info = job.header.h2.a['href']
+                    
+                    #15 if there are unfamiliar skills, loop through each one and if it exists in the required skills, add 1 to the unfamiliar_counter
+                    #16 if there are no unfamiliar skills in the required skills of the job posting then open a new .txt file associated with the job's index
+                        #16.5 and write the company name, required skills and more info link into it, then print where it was saved
+                    if unfamiliar_skills:
+                        if not any(unskill.lower() in skills.lower() for unskill in unfamiliar_skills):
+                            f.write(f"Company Name: {company_name.strip()} \n") 
+                            f.write(f"Required Skills: {skills.strip()} \n") 
+                            f.write(f"More Info: {more_info} \n\n")
 
-                unfamiliar_counter = 0
-                
-                #15 if there are unfamiliar skills, loop through each one and if it exists in the required skills, add 1 to the unfamiliar_counter
-                #16 if there are no unfamiliar skills in the required skills of the job posting then open a new .txt file associated with the job's index
-                    #16.5 and write the company name, required skills and more info link into it, then print where it was saved
-                if unfamiliar_skills:
-                    for skill in unfamiliar_skills:
-                        if skill in skills:
-                            unfamiliar_counter = unfamiliar_counter + 1
-                        
-                        if unfamiliar_counter == 0:
-                            with open(f'posts/{index}.txt', 'w') as f:
-                                f.write(f"Company Name: {company_name.strip()} \n") 
-                                f.write(f"Required Skills: {skills.strip()} \n") 
-                                f.write(f"More Info: {more_info}")
-                            print(f'File Saved: {index}')
-
-                #17 if there are no unfamiliar_skills at all then go ahead and write into a file the company name, required skill and more info link for the job
-                else:
-                    with open(f'posts/{index}.txt', 'w') as f:
+                    #17 if there are no unfamiliar_skills at all then go ahead and write into a file the company name, required skill and more info link for the job
+                    else:
                         f.write(f"Company Name: {company_name.strip()} \n") 
                         f.write(f"Required Skills: {skills.strip()} \n") 
-                        f.write(f"More Info: {more_info}")
-                    print(f'File Saved: {index}')
+                        f.write(f"More Info: {more_info} \n\n")
+
+            time.sleep(1)
+    print("All job postings have been saved to 'all_jobs.txt'")
 
 #18 if this python script is being run as the main program and not as a module to another script (which it isn't), then wait x time and rerun 
 if __name__ == '__main__':
@@ -87,17 +82,16 @@ if __name__ == '__main__':
     driver = webdriver.Chrome(service=service)
     driver.get(base_url)
     num_pages = 0
+    driver.maximize_window()
+    driver.implicitly_wait(30)
 
-    
     try:
-        driver.implicitly_wait(30)
         my_element1 = driver.find_element(By.XPATH, "//*[@id='closeSpanId']")
         my_element1.click()
     except (NoSuchElementException, TimeoutException):
         print("popup button not found.")
 
     try:
-        driver.implicitly_wait(10)
         my_element2 = driver.find_element(By.XPATH, "//*[@id='site']/div[6]/div/div[2]/button")
         my_element2.click()
     except (NoSuchElementException, TimeoutException):
@@ -121,6 +115,3 @@ if __name__ == '__main__':
         time_wait = 10
         print(f"Waiting {time_wait} minutes...")
         time.sleep(time_wait * 60)
-
-
-
