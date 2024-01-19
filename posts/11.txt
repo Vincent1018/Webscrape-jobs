@@ -1,3 +1,3 @@
-Company Name: pearlglobalsolutions 
-Required Skills: python,database,django,teamplayer,sql 
-More Info: https://www.timesjobs.com/job-detail/python-developer-pearl-global-solutions-cochin-kochi-ernakulam-4-to-7-yrs-jobid-dZD__SLASH__NDlCjpVzpSvf__PLUS__uAgZw==&source=srp
+Company Name: arttechnologyandsoftwareindiapvtltd 
+Required Skills: rest,python,database,django,api 
+More Info: https://www.timesjobs.com/job-detail/python-developer-art-technology-and-software-india-pvt-ltd-cochin-kochi-ernakulam-2-to-3-yrs-jobid-M26lxDEd__PLUS__qtzpSvf__PLUS__uAgZw==&source=srp

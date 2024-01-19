@@ -1,12 +1,11 @@
 from bs4 import BeautifulSoup
 from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException, TimeoutException, StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 import requests 
 import time
 
@@ -84,41 +83,44 @@ def find_jobs(base_url, num_pages):
 #18 if this python script is being run as the main program and not as a module to another script (which it isn't), then wait x time and rerun 
 if __name__ == '__main__':
     base_url = 'https://www.timesjobs.com/candidate/job-search.html?searchType=personalizedSearch&from=submit&txtKeywords=python&txtLocation='
-
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
     service = Service(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=chrome_options)
-    wait = WebDriverWait(driver, 10)
+    driver = webdriver.Chrome(service=service)
+    driver.get(base_url)
+    num_pages = 0
+
+    
+    try:
+        driver.implicitly_wait(30)
+        my_element1 = driver.find_element(By.XPATH, "//*[@id='closeSpanId']")
+        my_element1.click()
+    except (NoSuchElementException, TimeoutException):
+        print("popup button not found.")
 
     try:
-        driver.get(base_url)
+        driver.implicitly_wait(10)
+        my_element2 = driver.find_element(By.XPATH, "//*[@id='site']/div[6]/div/div[2]/button")
+        my_element2.click()
+    except (NoSuchElementException, TimeoutException):
+        print("button not found.")
+            
 
-        # Navigate through the pagination
-        while True:
-            try:
-                # Wait for the 'Next' button to be clickable
-                next_button = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "nxtC")))
+    while True:
+        try:
+            my_element3 = driver.find_element(By.XPATH, "//em[contains(@class, 'nxtC')]")
+            my_element3.click()
+        except (NoSuchElementException, TimeoutException):
+            pages = driver.find_elements(By.TAG_NAME, "em")
+            num_pages = max([int(page.text) for page in pages if page.text.isdigit()])
+            break
 
-                # Use JavaScript to click the 'Next' button
-                driver.execute_script("arguments[0].click();", next_button)
+    print(f"Number of pages: {num_pages}")
+    driver.quit()
+    
+    while True: 
+        find_jobs(base_url, num_pages)
+        time_wait = 10
+        print(f"Waiting {time_wait} minutes...")
+        time.sleep(time_wait * 60)
 
-            except (NoSuchElementException, TimeoutException, StaleElementReferenceException):
-                # Break the loop if 'Next' button is not found or not clickable
-                break
-
-        # Once the last page is reached, find the last page number
-        page_numbers = driver.find_elements(By.TAG_NAME, 'em')
-        last_page_num = max([int(page.text) for page in page_numbers if page.text.isdigit()])
-
-        print(f"Last page number: {last_page_num}")
-
-    finally:
-        driver.quit()
-    #while True: 
-     #   find_jobs(base_url, num_pages)
-      #  time_wait = 10
-       # print(f"Waiting {time_wait} minutes...")
-        #time.sleep(time_wait * 60)
 
 
